@@ -41,7 +41,6 @@ Consider clusters with many `burstable` workloads, where  containers have their 
 
 - For such clusters, schedulers should not only consider resource allocation (via requests) but also consider how likely their allowed peak usage (via limits) will exceed the capacity.
 - The proposed scheduler calculates a `limit-risk`, thus providing room for containers to burst.
-- [Detailed description and results](story-1.md)
 
 #### Story 2
 
@@ -50,10 +49,13 @@ Consider clusters where we have a lot of `burstable` workloads with varying usag
 ![](images/case-2.png)
 
 - For such clusters, it is desirable to consider not only the allowed peak usage but also the actual distribution of the usage.
-
 - This is an advanced scenario over the first one, where we consider both `limits` and the actual `usage`.
 - The proposed scheduler calculates `limit-risk` and `load-risk`,  thus providing room for containers to burst, lowering the chance of competing with other bursting containers on the same node.
-- [Detailed description and results](story-2.md)
+
+### Examples
+
+- [Example 1](example-1.md)
+- [Example 2](example-2.md)
 
 ### Notes/Constraints/Caveats
 

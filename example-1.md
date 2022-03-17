@@ -1,4 +1,4 @@
-# Story 1
+# Example 1
 
 Consider a cluster with two nodes, I and II, and a single resource (CPU). Both nodes have a capacity (allocatable) of 4 cores. The state of the cluster is described below. Pods A and B are placed on node I, and pods C, D, and E are placed on node II. Pods A, B, and C are similar in their specifications and behavior. They have a request of 1 core and a limit of 3 cores. They run a workload that is CPU-intensive, thus will use all 3 cores, if allowed. Pod D is a best-effort pod with a request of 0.9 cores and is mostly idle. And, pod E is a best-effort pod with a request of 0.1, but with a heavy load. Both nodes have the same total requests, hence equally likely to be selected by a default scheduler.
 

@@ -1,4 +1,4 @@
-# Story 2
+# Example 2
 
 This scenario is based on a real cluster of 3 nodes (node-21, node-24, and node-28) and a background injected load using a stress tool. (Here, for simplicity, we are concerned with the CPU resource, as memory was not stressed.) The node capacity (allocatable) is 3,910 millicores. The pending pod to be scheduled is a best-effort pod with a request of 100 millicores. The total node requests (allocation) and limits (including the pending pod) are shown in the table below. Node-28 had a much higher allocation of 3,568 millicores, compared to 2,617 and 2,544 millicores, for node-21 and node-24, respectively. All nodes were overcommitted, with node-21 being highest in overcommitment (5,816 millicores).
 
