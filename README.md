@@ -59,7 +59,7 @@ Consider clusters where we have a lot of `burstable` workloads with varying usag
 
 ### Notes/Constraints/Caveats
 
-Since the proposed scheduler plugin is load-aware and uses the [load-watcher](https://github.com/paypal/load-watcher), similar to the [Trimaran](https://github.com/kubernetes-sigs/scheduler-plugins/tree/master/pkg/trimaran) family of plugins, the suggestion is to add it to the family as *Trimaran-3* for short. The proposed name for the plugin is *LoadRiskAwareCommitment*. This way it could share common code with the other two plugins. A comparison of the three Trimaran load-aware scheduler plugins follow.
+Since the proposed scheduler plugin is load-aware and uses the [load-watcher](https://github.com/paypal/load-watcher), similar to the [Trimaran](https://github.com/kubernetes-sigs/scheduler-plugins/tree/master/pkg/trimaran) family of plugins, the suggestion is to add it to the family as *Trimaran-3* for short. The proposed name for the plugin is *LowRiskOverCommitment*. This way it could share common code with the other two plugins. A comparison of the three Trimaran load-aware scheduler plugins follow.
 
 ![trimaran-table](images/trimaran-table.png)
 
@@ -119,43 +119,45 @@ There are two parameters for the proposed plugin, in addition to the parameters 
 - *RiskLimitWeight*: As mentioned earlier, total risk is a weighted sum of limit rist and load risk. The weight which multiplies the limit risk is the RiskLimitWeight. The weight of the load risk is then (1 - RiskLimitWeight). The default value is 0.5, i.e. equally weighted.
 
 ```go
-// LoadRiskAwareCommitmentArgs holds arguments used to configure LoadRiskAwareCommitment plugin.
-type LoadRiskAwareCommitmentArgs struct {
- TrimaranArgs
-
- // Smoothing window size for usage data in the load watcher
- SmoothingWindowSize int64
- // Weight of risk due to limits (fraction)
- RiskLimitWeight float64
+// LowRiskOverCommitmentArgs holds arguments used to configure LowRiskOverCommitment plugin.
+type LowRiskOverCommitmentArgs struct {
+    metav1.TypeMeta
+    
+    // Common parameters for trimaran plugins
+    TrimaranSpec
+    // Smoothing window size for usage data in the load watcher
+    SmoothingWindowSize int64
+    // Weight of risk due to limits (fraction)
+    RiskLimitWeight float64
 }
 
-// TrimaranArgs hold common arguments for trimaran plugins
-type TrimaranArgs struct {
- metav1.TypeMeta
-
- // Metric Provider to use when using load watcher as a library
- MetricProvider MetricProviderSpec
- // Address of load watcher service
- WatcherAddress string
+// TrimaranSpec holds common parameters for trimaran plugins
+type TrimaranSpec struct {
+    // Metric Provider to use when using load watcher as a library
+    MetricProvider MetricProviderSpec
+    // Address of load watcher service
+    WatcherAddress string
 }
 
 // Denote the spec of the metric provider
 type MetricProviderSpec struct {
- // Types of the metric provider
- Type MetricProviderType
- // The address of the metric provider
- Address string
- // The authentication token of the metric provider
- Token string
+    // Types of the metric provider
+    Type MetricProviderType
+    // The address of the metric provider
+    Address string
+    // The authentication token of the metric provider
+    Token string
+    // Whether to enable the InsureSkipVerify options for https requests on Metric Providers.
+    InsecureSkipVerify bool
 }
 
 // MetricProviderType is a "string" type.
 type MetricProviderType string
 
 const (
- KubernetesMetricsServer MetricProviderType = "KubernetesMetricsServer"
- Prometheus              MetricProviderType = "Prometheus"
- SignalFx                MetricProviderType = "SignalFx"
+    KubernetesMetricsServer MetricProviderType = "KubernetesMetricsServer"
+    Prometheus              MetricProviderType = "Prometheus"
+    SignalFx                MetricProviderType = "SignalFx"
 )
 ```
 
@@ -169,7 +171,7 @@ metadata:
   namespace: trimaran
 data:
   config.yaml: |
-    apiVersion: kubescheduler.config.k8s.io/v1beta2
+    apiVersion: kubescheduler.config.k8s.io/v1beta3
     kind: KubeSchedulerConfiguration
     leaderElection:
       leaderElect: false
@@ -178,12 +180,12 @@ data:
       plugins:
         score:
           enabled:
-          - name: LoadRiskAwareCommitment
+          - name: LowRiskOverCommitment
             weight: 10
           disabled:
           - name: '*'
       pluginConfig:
-      - name: LoadRiskAwareCommitment
+      - name: LowRiskOverCommitment
         args:
           metricProvider:
             type: Prometheus
